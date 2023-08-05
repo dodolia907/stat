@@ -1,0 +1,42 @@
+version: '3'
+services:
+  grafana:
+    image: grafana/grafana-oss:main
+    container_name: grafana
+    user: "root"
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana:/var/lib/grafana
+  prometheus:
+    image: prom/prometheus:main
+    container_name: prometheus
+    restart: always
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9091:9090
+    depends_on:
+      - snmp-exporter
+    volumes:
+      - ./prometheus:/etc/prometheus
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    restart: always
+    ports:
+      - 8086:8086
+      - 8083:8083
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+  snmp-exporter:
+    image: prom/snmp-exporter:latest
+    container_name: snmp-exporter
+    restart: always
+    ports:
+      - "9116:9116"
+    volumes:
+      - ./snmp-exporter/snmp.yml:/etc/snmp_exporter/snmp.yml
